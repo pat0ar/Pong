@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Pong Game</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background: #000;
+        }
+        canvas {
+            border: 1px solid #fff;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="pongCanvas" width="800" height="400"></canvas>
+    <script>
+        const canvas = document.getElementById('pongCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const paddleHeight = 75;
+        const paddleWidth = 10;
+        const ballRadius = 10;
+
+        let paddle1Y = (canvas.height - paddleHeight) / 2;
+        let paddle2Y = (canvas.height - paddleHeight) / 2;
+        let ballX = canvas.width / 2;
+        let ballY = canvas.height / 2;
+        let ballDX = 2;
+        let ballDY = 2;
+
+        const paddleSpeed = 7;
+        let upPressed = false;
+        let downPressed = false;
+        let wPressed = false;
+        let sPressed = false;
+
+        let player1Score = 0;
+        let player2Score = 0;
+
+        function drawPaddle(x, y) {
+            ctx.beginPath();
+            ctx.rect(x, y, paddleWidth, paddleHeight);
+            ctx.fillStyle = "#fff";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function drawBall() {
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+            ctx.fillStyle = "#fff";
+            ctx.fill();
+            ctx.closePath();
+        }
+
+        function drawScore() {
+            ctx.font = "16px Arial";
+            ctx.fillStyle = "#fff";
+            ctx.fillText(`Player 1: ${player1Score}`, 50, 20);
+            ctx.fillText(`Player 2: ${player2Score}`, canvas.width - 150, 20);
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            drawPaddle(0, paddle1Y);
+            drawPaddle(canvas.width - paddleWidth, paddle2Y);
+            drawBall();
+            drawScore();
+
+            if (ballY + ballDY < ballRadius || ballY + ballDY > canvas.height - ballRadius) {
+                ballDY = -ballDY;
+            }
+
+            if (ballX + ballDX < paddleWidth) {
+                if (ballY > paddle1Y && ballY < paddle1Y + paddleHeight) {
+                    ballDX = -ballDX;
+                } else {
+                    player2Score++;
+                    resetBall();
+                }
+            } else if (ballX + ballDX > canvas.width - paddleWidth) {
+                if (ballY > paddle2Y && ballY < paddle2Y + paddleHeight) {
+                    ballDX = -ballDX;
+                } else {
+                    player1Score++;
+                    resetBall();
+                }
+            }
+
+            ballX += ballDX;
+            ballY += ballDY;
+
+            if (wPressed && paddle1Y > 0) {
+                paddle1Y -= paddleSpeed;
+            } else if (sPressed && paddle1Y < canvas.height - paddleHeight) {
+                paddle1Y += paddleSpeed;
+            }
+
+            if (upPressed && paddle2Y > 0) {
+                paddle2Y -= paddleSpeed;
+            } else if (downPressed && paddle2Y < canvas.height - paddleHeight) {
+                paddle2Y += paddleSpeed;
+            }
+
+            requestAnimationFrame(draw);
+        }
+
+        function resetBall() {
+            ballX = canvas.width / 2;
+            ballY = canvas.height / 2;
+            ballDX = -ballDX;
+        }
+
+        document.addEventListener("keydown", keyDownHandler);
+        document.addEventListener("keyup", keyUpHandler);
+
+        function keyDownHandler(e) {
+            if (e.key === "Up" || e.key === "ArrowUp") {
+                upPressed = true;
+            } else if (e.key === "Down" || e.key === "ArrowDown") {
+                downPressed = true;
+            } else if (e.key === "w" || e.key === "W") {
+                wPressed = true;
+            } else if (e.key === "s" || e.key === "S") {
+                sPressed = true;
+            }
+        }
+
+        function keyUpHandler(e) {
+            if (e.key === "Up" || e.key === "ArrowUp") {
+                upPressed = false;
+            } else if (e.key === "Down" || e.key === "ArrowDown") {
+                downPressed = false;
+            } else if (e.key === "w" || e.key === "W") {
+                wPressed = false;
+            } else if (e.key === "s" || e.key === "S") {
+                sPressed = false;
+            }
+        }
+
+        draw();
+    </script>
+</body>
+</html>
